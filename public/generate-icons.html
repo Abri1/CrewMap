@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Generate PWA Icons</title>
+</head>
+<body>
+  <h1>PWA Icon Generator for Crew Map</h1>
+  <p>Right-click and save each canvas as the specified filename</p>
+
+  <div>
+    <h3>icon-192.png (192x192)</h3>
+    <canvas id="icon192" width="192" height="192"></canvas>
+  </div>
+
+  <div>
+    <h3>icon-512.png (512x512)</h3>
+    <canvas id="icon512" width="512" height="512"></canvas>
+  </div>
+
+  <div>
+    <h3>icon-maskable.png (192x192 with padding)</h3>
+    <canvas id="iconMaskable" width="192" height="192"></canvas>
+  </div>
+
+  <script>
+    function drawIcon(canvasId, size, isMaskable = false) {
+      const canvas = document.getElementById(canvasId);
+      const ctx = canvas.getContext('2d');
+
+      // Background
+      ctx.fillStyle = '#fbbf24'; // Amber
+      if (isMaskable) {
+        // For maskable, use circle with padding
+        ctx.beginPath();
+        ctx.arc(size/2, size/2, size * 0.4, 0, Math.PI * 2);
+        ctx.fill();
+      } else {
+        // Rounded square
+        const radius = size * 0.1;
+        ctx.beginPath();
+        ctx.moveTo(radius, 0);
+        ctx.lineTo(size - radius, 0);
+        ctx.quadraticCurveTo(size, 0, size, radius);
+        ctx.lineTo(size, size - radius);
+        ctx.quadraticCurveTo(size, size, size - radius, size);
+        ctx.lineTo(radius, size);
+        ctx.quadraticCurveTo(0, size, 0, size - radius);
+        ctx.lineTo(0, radius);
+        ctx.quadraticCurveTo(0, 0, radius, 0);
+        ctx.closePath();
+        ctx.fill();
+      }
+
+      // Draw truck icon
+      ctx.fillStyle = '#111827'; // Dark gray
+      ctx.strokeStyle = '#111827';
+      ctx.lineWidth = size * 0.02;
+
+      const scale = isMaskable ? 0.3 : 0.4;
+      const offsetX = size * 0.5;
+      const offsetY = size * 0.5;
+
+      ctx.save();
+      ctx.translate(offsetX, offsetY);
+      ctx.scale(scale, scale);
+
+      // Truck body
+      ctx.fillRect(-80, -40, 100, 60);
+      ctx.fillRect(20, -50, 60, 70);
+
+      // Wheels
+      ctx.fillStyle = '#fbbf24';
+      ctx.beginPath();
+      ctx.arc(-40, 30, 15, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.beginPath();
+      ctx.arc(40, 30, 15, 0, Math.PI * 2);
+      ctx.fill();
+
+      // Window
+      ctx.fillStyle = '#fff';
+      ctx.fillRect(25, -45, 50, 30);
+
+      // Location pin on top
+      ctx.fillStyle = '#ef4444'; // Red
+      ctx.beginPath();
+      ctx.moveTo(0, -60);
+      ctx.bezierCurveTo(-15, -75, -15, -90, 0, -90);
+      ctx.bezierCurveTo(15, -90, 15, -75, 0, -60);
+      ctx.closePath();
+      ctx.fill();
+
+      ctx.fillStyle = '#fff';
+      ctx.beginPath();
+      ctx.arc(0, -82, 5, 0, Math.PI * 2);
+      ctx.fill();
+
+      ctx.restore();
+    }
+
+    // Generate icons
+    drawIcon('icon192', 192);
+    drawIcon('icon512', 512);
+    drawIcon('iconMaskable', 192, true);
+
+    // Auto-download function
+    function downloadCanvas(canvasId, filename) {
+      const canvas = document.getElementById(canvasId);
+      canvas.toBlob(function(blob) {
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = filename;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+      });
+    }
+
+    // Add download buttons
+    setTimeout(() => {
+      document.querySelectorAll('canvas').forEach(canvas => {
+        const btn = document.createElement('button');
+        btn.textContent = 'Download';
+        btn.style.display = 'block';
+        btn.style.marginTop = '10px';
+        btn.onclick = () => {
+          const filename = canvas.id.replace('icon', 'icon-').replace('Maskable', '-maskable') + '.png';
+          downloadCanvas(canvas.id, filename);
+        };
+        canvas.parentElement.appendChild(btn);
+      });
+    }, 100);
+  </script>
+</body>
+</html>

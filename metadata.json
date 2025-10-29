@@ -1,0 +1,8 @@
+{
+  "name": "Crew Map",
+  "description": "A real-time location tracking application for truck drivers in a harvest crew. It allows crew members to see each other's live locations and travel paths on a shared map.",
+  "requestFramePermissions": [
+    "geolocation",
+    "screen-wake-lock"
+  ]
+}
