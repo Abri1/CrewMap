@@ -230,7 +230,8 @@ const App: React.FC = () => {
     return { lat: 34.0522, lng: -118.2437 };
   }, [crew, myLocation, selectedMemberId]);
 
-  if (isDesktop) return <DesktopWarning />;
+  // Temporarily disabled desktop restriction for debugging
+  // if (isDesktop) return <DesktopWarning />;
 
   if (authState === 'authenticating') {
     return (
@@ -275,6 +276,12 @@ const App: React.FC = () => {
 
   return (
     <div className="w-screen h-screen bg-gray-700">
+      {/* Desktop debugging notice */}
+      {isDesktop && (
+        <div className="fixed top-0 left-0 right-0 bg-yellow-600 text-black text-xs px-2 py-1 z-[500] text-center">
+          Desktop Mode - For debugging only. Best experienced on mobile devices.
+        </div>
+      )}
       <Toast
         message={toast?.message}
         type={toast?.type}

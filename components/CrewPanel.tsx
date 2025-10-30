@@ -46,8 +46,8 @@ const CrewPanel: React.FC<CrewPanelProps> = ({
   }
   
   return (
-    <div className="absolute bottom-0 left-0 right-0 z-[1000] p-2">
-      <div className="bg-gray-800/90 backdrop-blur-sm text-white rounded-2xl shadow-2xl overflow-hidden max-w-lg mx-auto">
+    <div className="absolute bottom-0 left-0 right-0 z-[1000] p-2 lg:left-auto lg:bottom-4 lg:right-4 lg:w-96">
+      <div className="bg-gray-800/90 backdrop-blur-sm text-white rounded-2xl shadow-2xl overflow-hidden max-w-lg mx-auto lg:max-w-none">
         {/* Header */}
         <div className="flex justify-between items-center p-4" onClick={() => setIsExpanded(!isExpanded)}>
           <div className="flex items-center space-x-3">
