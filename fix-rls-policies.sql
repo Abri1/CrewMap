@@ -50,11 +50,11 @@ USING (true);
 
 CREATE POLICY "Users can update own member data"
 ON public.members FOR UPDATE
-USING (auth.uid()::text = id OR true); -- Allow all for anonymous users
+USING (true); -- Allow all updates for now
 
 CREATE POLICY "Users can delete own member data"
 ON public.members FOR DELETE
-USING (auth.uid()::text = id OR true); -- Allow all for anonymous users
+USING (true); -- Allow all deletes for now
 
 -- 5. Grant necessary permissions to anonymous users
 GRANT ALL ON public.crews TO anon;
