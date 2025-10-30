@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" fill="#fbbf24">
+  <!-- Harvester icon inspired design -->
+  <circle cx="256" cy="256" r="240" fill="#1f2937"/>
+  <path d="M256 96 L176 256 L256 416 L336 256 Z" fill="#fbbf24"/>
+  <circle cx="256" cy="256" r="80" fill="#1f2937"/>
+  <circle cx="256" cy="256" r="40" fill="#fbbf24"/>
+  <path d="M256 176 L216 216 L296 216 Z" fill="#fbbf24"/>
+  <path d="M256 336 L296 296 L216 296 Z" fill="#fbbf24"/>
+  <path d="M176 256 L216 216 L216 296 Z" fill="#fbbf24"/>
+  <path d="M336 256 L296 296 L296 216 Z" fill="#fbbf24"/>
+</svg>
