@@ -110,42 +110,65 @@
                 log(`❌ Members check failed: ${e.message}`, 'error');
             }
 
-            // Test 3: Check anonymous authentication
+            // Test 3: Check current session
+            try {
+                const { data: { session }, error: sessionError } = await supabase.auth.getSession();
+                if (session) {
+                    log(`ℹ️ Existing session found. User ID: ${session.user?.id}`, 'success');
+                } else {
+                    log('ℹ️ No existing session, will attempt anonymous sign-in', 'pending');
+                }
+            } catch (e) {
+                log(`⚠️ Session check error: ${e.message}`, 'warning');
+            }
+
+            // Test 4: Check anonymous authentication
             try {
                 const { data, error } = await supabase.auth.signInAnonymously();
                 if (error) {
                     log(`❌ Anonymous authentication is NOT enabled! Error: ${error.message}`, 'error');
                     log('⚠️ Go to Supabase Dashboard → Authentication → Providers → Enable "Anonymous Sign-Ins"', 'warning');
+                    log('⚠️ This is likely causing your 500 error!', 'error');
                 } else {
                     log(`✅ Anonymous authentication is enabled. User ID: ${data.user?.id}`, 'success');
 
-                    // Test 4: Try to insert a test crew
+                    // Test 5: Try to insert a test crew
                     const testCrewId = 'TEST-' + Math.random().toString(36).substring(7);
                     const { error: insertError } = await supabase.from('crews').insert({ id: testCrewId });
 
                     if (insertError) {
                         log(`❌ Cannot insert into crews: ${insertError.message}`, 'error');
+                        log(`<pre>Error details: ${JSON.stringify(insertError, null, 2)}</pre>`, 'error');
                         if (insertError.message.includes('new row violates row-level security')) {
-                            log('⚠️ RLS is blocking inserts. Check your RLS policies.', 'warning');
+                            log('⚠️ RLS is blocking inserts. Run fix-rls-simple.sql again.', 'warning');
                         }
                     } else {
                         log(`✅ Successfully inserted test crew: ${testCrewId}`, 'success');
 
-                        // Test 5: Try to insert a test member
-                        const { error: memberError } = await supabase
+                        // Test 6: Try to insert a test member (exactly like the app does)
+                        const memberData = {
+                            id: data.user?.id || 'test-user',
+                            crew_id: testCrewId,
+                            name: 'Test User',
+                            color: '#fbbf24',
+                            last_update: new Date().toISOString()
+                        };
+
+                        log(`ℹ️ Attempting to insert member with data: <pre>${JSON.stringify(memberData, null, 2)}</pre>`, 'pending');
+
+                        const { data: memberResult, error: memberError } = await supabase
                             .from('members')
-                            .insert({
-                                id: data.user?.id || 'test-user',
-                                crew_id: testCrewId,
-                                name: 'Test User',
-                                color: '#fbbf24',
-                                last_update: new Date().toISOString()
-                            });
+                            .insert(memberData)
+                            .select()
+                            .single();
 
                         if (memberError) {
                             log(`❌ Cannot insert into members: ${memberError.message}`, 'error');
+                            log(`<pre>Error details: ${JSON.stringify(memberError, null, 2)}</pre>`, 'error');
+                            log('⚠️ This is the same error your app is getting!', 'error');
                         } else {
                             log('✅ Successfully inserted test member', 'success');
+                            log(`<pre>Member data: ${JSON.stringify(memberResult, null, 2)}</pre>`, 'success');
 
                             // Clean up
                             await supabase.from('members').delete().eq('crew_id', testCrewId);
