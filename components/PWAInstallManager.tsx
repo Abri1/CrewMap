@@ -48,8 +48,8 @@ const IOSInstallInstructions: React.FC<IOSInstallInstructionsProps> = ({ onClose
   const [step, setStep] = useState(1);
 
   return (
-    <div className="fixed inset-0 bg-black/80 z-[3000] flex items-end">
-      <div className="bg-gray-900 text-white w-full max-w-lg mx-auto rounded-t-3xl p-6 animate-slide-up">
+    <div className="fixed inset-0 bg-black/90 backdrop-blur-sm z-[3000] flex items-end" onClick={onClose}>
+      <div className="bg-gray-900 text-white w-full max-w-lg mx-auto rounded-t-3xl p-6 animate-slide-up shadow-2xl" onClick={(e) => e.stopPropagation()}>
         <div className="flex items-center justify-between mb-6">
           <h2 className="text-xl font-bold flex items-center gap-2">
             <span className="text-2xl">📲</span>
@@ -174,8 +174,8 @@ interface AndroidInstallPromptProps {
 
 const AndroidInstallPrompt: React.FC<AndroidInstallPromptProps> = ({ onInstall, onClose }) => {
   return (
-    <div className="fixed inset-0 bg-black/60 z-[3000] flex items-center justify-center p-4">
-      <div className="bg-gray-900 text-white rounded-2xl p-6 max-w-sm w-full animate-scale-in">
+    <div className="fixed inset-0 bg-black/90 backdrop-blur-sm z-[3000] flex items-center justify-center p-4" onClick={onClose}>
+      <div className="bg-gray-900 text-white rounded-2xl p-6 max-w-sm w-full animate-scale-in shadow-2xl" onClick={(e) => e.stopPropagation()}>
         <div className="flex justify-center mb-4">
           <div className="bg-amber-500 rounded-2xl p-4">
             <HarvesterIcon className="w-16 h-16 text-gray-900" />
@@ -352,7 +352,7 @@ const PWAInstallManager: React.FC = () => {
       {!showIOSInstructions && !showAndroidPrompt && platform === 'ios' && (
         <button
           onClick={() => setShowIOSInstructions(true)}
-          className="fixed top-2 right-2 z-[1500] bg-amber-500 text-black px-3 py-1 rounded-lg text-xs font-bold shadow-lg"
+          className="fixed top-4 right-4 z-[1500] bg-amber-500 text-black px-4 py-2 rounded-lg text-sm font-bold shadow-lg hover:bg-amber-400 transition-colors"
         >
           📲 Install App
         </button>

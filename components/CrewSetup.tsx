@@ -44,7 +44,7 @@ const CrewSetup: React.FC<CrewSetupProps> = ({ onCreateCrew, onJoinCrew, loading
   }
 
   return (
-    <div className="flex flex-col items-center justify-center min-h-screen p-4">
+    <div className="flex flex-col items-center justify-center min-h-screen p-4 bg-slate-900">
       <div className="text-center mb-6">
         <HarvesterIcon className="w-20 h-20 text-yellow-400 mx-auto" />
         <h1 className="text-4xl font-bold text-white">Crew Map</h1>
