@@ -63,9 +63,15 @@ const CrewSetup: React.FC<CrewSetupProps> = ({ onCreateCrew, onJoinCrew, loading
             type="text"
             value={memberName}
             onChange={(e) => setMemberName(e.target.value)}
-            className="w-full px-4 py-2 bg-slate-700 border border-slate-600 rounded-md focus:outline-none focus:ring-2 focus:ring-yellow-400 text-white placeholder-slate-400"
+            className="w-full px-4 py-2 rounded-md focus:outline-none focus:ring-2 focus:ring-yellow-400"
             placeholder="e.g., John D."
-            style={{ color: 'white' }}
+            style={{
+              backgroundColor: '#334155',
+              borderColor: '#475569',
+              color: '#ffffff',
+              borderWidth: '1px',
+              borderStyle: 'solid'
+            }}
           />
         </div>
 
@@ -90,10 +96,16 @@ const CrewSetup: React.FC<CrewSetupProps> = ({ onCreateCrew, onJoinCrew, loading
                     type="text"
                     value={crewId}
                     onChange={(e) => setCrewId(e.target.value)}
-                    className="flex-grow px-4 py-2 bg-slate-700 border border-slate-600 rounded-md focus:outline-none focus:ring-2 focus:ring-yellow-400 text-white placeholder-slate-400"
+                    className="flex-grow px-4 py-2 rounded-md focus:outline-none focus:ring-2 focus:ring-yellow-400"
                     placeholder="Enter Crew ID"
                     autoCapitalize="none"
-                    style={{ color: 'white' }}
+                    style={{
+                      backgroundColor: '#334155',
+                      borderColor: '#475569',
+                      color: '#ffffff',
+                      borderWidth: '1px',
+                      borderStyle: 'solid'
+                    }}
                 />
                 <button onClick={handleJoin} disabled={loading} className="px-4 py-2 bg-slate-600 text-white font-semibold rounded-md hover:bg-slate-500 disabled:opacity-50">
                     Join
