@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Crew Map - Supabase Debug</title>
+    <style>
+        body {
+            font-family: system-ui, -apple-system, sans-serif;
+            max-width: 800px;
+            margin: 40px auto;
+            padding: 20px;
+            background: #1f2937;
+            color: #f3f4f6;
+        }
+        .status {
+            padding: 10px;
+            border-radius: 5px;
+            margin: 10px 0;
+        }
+        .success { background: #10b981; color: white; }
+        .error { background: #ef4444; color: white; }
+        .pending { background: #6b7280; color: white; }
+        .warning { background: #f59e0b; color: white; }
+        button {
+            background: #3b82f6;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            margin: 5px;
+        }
+        button:hover { background: #2563eb; }
+        pre {
+            background: #111827;
+            padding: 10px;
+            border-radius: 5px;
+            overflow-x: auto;
+        }
+    </style>
+</head>
+<body>
+    <h1>🚜 Crew Map - Supabase Debug Tool</h1>
+
+    <div id="results"></div>
+
+    <script type="module">
+        import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
+
+        const supabaseUrl = 'https://vhlsirvyerzbhyfwsyoj.supabase.co';
+        const supabaseAnonKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZobHNpcnZ5ZXJ6Ymh5ZnczeW9qIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MzAzMDYzODIsImV4cCI6MjA0NTg4MjM4Mn0.hVlZG0Uy-4Qb_-mDZ9fLEsF2TaD9PBFvP0TJ3mE_-b0';
+
+        const supabase = createClient(supabaseUrl, supabaseAnonKey);
+        const results = document.getElementById('results');
+
+        function log(message, type = 'pending') {
+            const div = document.createElement('div');
+            div.className = `status ${type}`;
+            div.innerHTML = message;
+            results.appendChild(div);
+        }
+
+        async function runTests() {
+            results.innerHTML = '';
+            log('Starting Supabase diagnostics...');
+
+            // Test 1: Check connection
+            try {
+                const { data, error } = await supabase.from('crews').select('id').limit(1);
+                if (error) {
+                    if (error.message.includes('relation "public.crews" does not exist')) {
+                        log('❌ Table "crews" does not exist! Run the SQL migration.', 'error');
+                        log(`<pre>CREATE TABLE IF NOT EXISTS crews (
+    id TEXT PRIMARY KEY,
+    created_at TIMESTAMPTZ DEFAULT now()
+);</pre>`, 'warning');
+                    } else {
+                        log(`❌ Database error: ${error.message}`, 'error');
+                    }
+                } else {
+                    log('✅ Connected to Supabase and "crews" table exists', 'success');
+                }
+            } catch (e) {
+                log(`❌ Connection failed: ${e.message}`, 'error');
+            }
+
+            // Test 2: Check members table
+            try {
+                const { data, error } = await supabase.from('members').select('id').limit(1);
+                if (error) {
+                    if (error.message.includes('relation "public.members" does not exist')) {
+                        log('❌ Table "members" does not exist! Run the SQL migration.', 'error');
+                        log(`<pre>CREATE TABLE IF NOT EXISTS members (
+    id TEXT PRIMARY KEY,
+    crew_id TEXT REFERENCES crews(id) ON DELETE CASCADE,
+    name TEXT NOT NULL,
+    color TEXT,
+    current_location JSONB,
+    speed REAL,
+    last_update TIMESTAMPTZ DEFAULT now()
+);</pre>`, 'warning');
+                    } else {
+                        log(`❌ Members table error: ${error.message}`, 'error');
+                    }
+                } else {
+                    log('✅ "members" table exists', 'success');
+                }
+            } catch (e) {
+                log(`❌ Members check failed: ${e.message}`, 'error');
+            }
+
+            // Test 3: Check anonymous authentication
+            try {
+                const { data, error } = await supabase.auth.signInAnonymously();
+                if (error) {
+                    log(`❌ Anonymous authentication is NOT enabled! Error: ${error.message}`, 'error');
+                    log('⚠️ Go to Supabase Dashboard → Authentication → Providers → Enable "Anonymous Sign-Ins"', 'warning');
+                } else {
+                    log(`✅ Anonymous authentication is enabled. User ID: ${data.user?.id}`, 'success');
+
+                    // Test 4: Try to insert a test crew
+                    const testCrewId = 'TEST-' + Math.random().toString(36).substring(7);
+                    const { error: insertError } = await supabase.from('crews').insert({ id: testCrewId });
+
+                    if (insertError) {
+                        log(`❌ Cannot insert into crews: ${insertError.message}`, 'error');
+                        if (insertError.message.includes('new row violates row-level security')) {
+                            log('⚠️ RLS is blocking inserts. Check your RLS policies.', 'warning');
+                        }
+                    } else {
+                        log(`✅ Successfully inserted test crew: ${testCrewId}`, 'success');
+
+                        // Test 5: Try to insert a test member
+                        const { error: memberError } = await supabase
+                            .from('members')
+                            .insert({
+                                id: data.user?.id || 'test-user',
+                                crew_id: testCrewId,
+                                name: 'Test User',
+                                color: '#fbbf24',
+                                last_update: new Date().toISOString()
+                            });
+
+                        if (memberError) {
+                            log(`❌ Cannot insert into members: ${memberError.message}`, 'error');
+                        } else {
+                            log('✅ Successfully inserted test member', 'success');
+
+                            // Clean up
+                            await supabase.from('members').delete().eq('crew_id', testCrewId);
+                            await supabase.from('crews').delete().eq('id', testCrewId);
+                            log('🧹 Cleaned up test data', 'success');
+                        }
+                    }
+
+                    // Sign out
+                    await supabase.auth.signOut();
+                }
+            } catch (e) {
+                log(`❌ Auth test failed: ${e.message}`, 'error');
+            }
+
+            log('<br><strong>Diagnostics complete!</strong>');
+        }
+
+        // Run tests on load
+        runTests();
+
+        // Add button to re-run tests
+        const button = document.createElement('button');
+        button.textContent = '🔄 Re-run Tests';
+        button.onclick = runTests;
+        document.body.insertBefore(button, results);
+    </script>
+</body>
+</html>
