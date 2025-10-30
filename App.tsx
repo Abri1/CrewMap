@@ -83,6 +83,8 @@ const App: React.FC = () => {
             setUser(data.user);
             setAuthState('authenticated');
           } else {
+            console.error('Anonymous sign-in failed:', error);
+            setToast({ message: 'Authentication failed. Please enable anonymous sign-in in Supabase.', type: 'error' });
             setAuthState('unauthenticated');
           }
         }
@@ -146,7 +148,10 @@ const App: React.FC = () => {
   }, [myLocation?.coords.latitude, myLocation?.coords.longitude]);
 
   const handleJoinCrew = async (crewId: string, memberName: string) => {
-    if (!user) return;
+    if (!user) {
+      showToast('Authentication required. Please refresh the page.', 'error');
+      return;
+    }
     setLoading(true);
     try {
       const member = await joinCrew(crewId, user.id, memberName);
@@ -165,7 +170,10 @@ const App: React.FC = () => {
   };
   
   const handleCreateCrew = async (memberName: string, color: string) => {
-    if (!user) return;
+    if (!user) {
+      showToast('Authentication required. Please refresh the page.', 'error');
+      return;
+    }
     setLoading(true);
     try {
       const { crewId, member } = await createCrew(user.id, memberName, color);
